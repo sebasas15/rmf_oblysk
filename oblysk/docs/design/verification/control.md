@@ -26,10 +26,18 @@ not latency or real-host behaviour.
 Two rows are decided by enumeration over declared structure, with nothing running.
 
 `INV-RMF-1` is a decision table over (required capability tags × reported capability tags), plus a
-**perturbation oracle**: take one qualified and one unqualified bidder, vary the unqualified bidder's
-cost, score or priority across its full range, and require the outcome not to change. That second
-half is what distinguishes a filter from a steep penalty, and it is still T3 — it is two evaluations
-of a pure function, not a driven system.
+**perturbation oracle** whose *direction* is the whole of its value: take one qualified and one
+unqualified bidder and raise **the qualified bidder's** cost without bound, requiring the award never
+to move to the unqualified one. Equivalently, observe the eligible set directly, before ranking.
+
+Sweeping the *unqualified* bidder's cost instead — the obvious first draft — cannot discriminate.
+Under a penalty design that bidder's effective score is `base + P`, and for the large `P` the row's
+Forbids clause names first, the qualified cost `C` stays below `base + P` across the entire sweep:
+the outcome is flat and the oracle passes on the design it exists to catch. The row's own Forbids
+clause says where the failure arrives — *"under enough load every penalty is payable"* — and load
+raises the **qualified** bidder's cost, which is the variable the first draft held fixed.
+
+Still T3 either way: two evaluations of a pure function, not a driven system.
 
 `INV-RMF-5` is an enumeration of the declared refusal reason set against the operationally
 distinguishable outcomes: at minimum no-eligible-bidder, no-bids-within-bound, request-inadmissible,
@@ -141,7 +149,7 @@ consequently unreachable and no stage vector may assign it.
 Worth stating positively, because the absences are as informative as the presences.
 
 **Nothing at T2.** Compare `audit`, whose `INV-AUD-3` needs a real write-once substrate, and
-`conduit`, whose three hardest rows need a real boundary and a real identity authority. This group
+`conduit`, whose **four** T2 rows need a real boundary, a real identity authority and a real host. This group
 has no such row: every boundary it touches is one a double can stand in for, and no claim it makes is
 about what a real host does. A design that found itself needing a real fleet to discharge a row here
 would be evidence that the row had drifted into describing the fleet rather than constraining the

@@ -43,7 +43,7 @@ flowchart LR
   C["Component"]
   C --o P(["IProvided ○"])
   C -.->|"«requires» IRequired (G4)"| EXT["External provider"]
-  C -.-> S{{"ISeam «strategy»"}}
+  C -.-> S{{"ISeam «adapter»"}}
   class S seam;
 ```
 

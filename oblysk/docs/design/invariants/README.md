@@ -106,15 +106,16 @@ whether a design exists for the obligations being written, and none did.
 
 ## 5. Cross-group ties
 
-Where one group's invariant assumes another group's guarantee. `Minimal` is checked *within* a
-catalog; a tie is the only place a dependency across catalogs is recorded.
+Where one group's invariant assumes another group's guarantee.
+
+**`Minimal` is checked across catalogs, not only within one** — a change this cycle made and worth stating, because the older phrasing ("`Minimal` is checked *within* a catalog") is what allowed a row to be admitted here and withdrawn two tasks later. Two candidates below were rejected on clause 5 against `edge_oblysk`'s catalog *before drafting*. A tie remains the place a surviving dependency is recorded; it is no longer the only place another catalog is consulted.
 
 | Upstream | Downstream | What the pairing asserts | Which half each side owns |
 |---|---|---|---|
 | `INV-FP-1` (`edge_oblysk`) — every request enacted at the dispatch boundary has exactly one prior PASS verdict | *(no row here — rejected on clause 5)* | CTL-6's single-gate obligation is one claim about one boundary, and the boundary already has an owner. This group consumes the verdict and asserts nothing about it. | **fast-path** owns that a permission exists before the boundary. **control** owns nothing here, deliberately. |
 | `INV-FP-14` (`edge_oblysk`) — one intent yields at most one enacted motion, absorbed **at the receiving boundary** | `INV-RMF-3` — at most one live commitment per request | **The obligation lands here while the row lives there.** `INV-FP-14` requires *this component* to absorb a duplicate delivery; `INV-RMF-3` forbids *this component* from committing twice on its own initiative. A receiver with perfect upstream idempotency can still double-award after a timeout. | **fast-path** owns duplicate *delivery*. **control** owns duplicate *decision*. |
 | `INV-HA-18`, `INV-HA-20`, `INV-HA-21` — single-writer discipline over the schedule of record (HAZ-19) | *(no row here — rejected on clause 5)* | Commitments become reservations in the schedule, so this group writes to something another group owns the safety of. | **ha** owns who may write the schedule. **control** owns whether a commitment should have been made at all. |
-| `INV-HA-8` — bounded command freshness; `INV-FP-1` — the verdict's own validity | *(no row here)* | CA1's wrong-timing cell is cleared against these: a request whose verdict has lapsed is a staleness question, and both halves are owned upstream. | **ha**/**fast-path** own the verdict's age. **control** owns not re-deciding it. |
+| `INV-HA-8` — command age from issue to actuation | *(no row here, and **no row anywhere**)* | The first draft cleared CA1's wrong-timing cell against `INV-HA-8` and `INV-FP-1`. Neither holds it: `INV-FP-1` bounds the *authority's* currency at the moment the verdict was used, and `INV-HA-8` bounds a *command's* age downstream of issuance. A verdict issued at `T` and accepted at `T + Δ` satisfies both. | **control** owns not re-deciding a verdict it was handed. **Nobody owns `Δ`** — see [`control.md §7`](control.md#7-open-gaps-and-escalations). |
 
 **Strength, recorded rather than smoothed.**
 

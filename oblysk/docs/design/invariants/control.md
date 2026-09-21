@@ -20,8 +20,7 @@ Taxonomy, admission gate, and ID grammar: [`README.md`](README.md).
 >
 > **Two catalogs were read before writing, not after, and both cost a candidate.** This is the
 > correction Cycle B's first seam learned the hard way: the catalog that already parents to your own
-> hazards is the first one to read. `requirements/invariants.md:97–107` gives HAZ-1 → `INV-FP-1`,
-> HAZ-15 → `INV-FP-14`, HAZ-35 → `INV-IR-7`. Reading them rejected two rows on clause 5 before either
+> hazards is the first one to read. `requirements/invariants.md`'s refinement column gives HAZ-1 → `INV-FP-1` (line 90), HAZ-15 → `INV-FP-14` (line 104), HAZ-35 → `INV-IR-7` (line 124). Reading them rejected two rows on clause 5 before either
 > was drafted — see §5 — and the second rejection is the more interesting one, because `INV-FP-14`
 > places its obligation *on this component* while being owned by another.
 >
@@ -116,7 +115,7 @@ Every control action from §1 × the four canonical classes. A cell is either a 
 
 | Control action | Not provided | Provided unsafely | Wrong timing / order | Stopped too soon / applied too long |
 |---|---|---|---|---|
-| **CA1** accept a request | **HAZ-35** — a validated request is never taken up: it sits in neither of its two legitimate end states, started or refused, and nothing reports that it is stuck | considered-and-clear: accepting something that never traversed the gate is `INV-FP-1`'s subject (`edge_oblysk`), which quantifies over *every* movement request enacted at the dispatch boundary and requires exactly one prior PASS verdict from an admitted authority. Duplicating it here is rejected in §5 on clause 5 | considered-and-clear: accepting a request whose verdict has lapsed is bounded command freshness, owned by `INV-HA-8`; the verdict's own validity window is `INV-FP-1`'s | **HAZ-35** — accepted indefinitely under sustained overload rather than refused, so the accepted set grows and every artifact in it is in neither end state |
+| **CA1** accept a request | **HAZ-35** — a validated request is never taken up: it sits in neither of its two legitimate end states, started or refused, and nothing reports that it is stuck | considered-and-clear: accepting something that never traversed the gate is `INV-FP-1`'s subject (`edge_oblysk`), which quantifies over *every* movement request enacted at the dispatch boundary and requires exactly one prior PASS verdict from an admitted authority. Duplicating it here is rejected in §5 on clause 5 | considered-and-clear **on a narrower ground than the first draft claimed**: this group does not re-decide a verdict it was handed, and no row here quantifies over verdict age. The first draft attributed the obligation to `INV-HA-8` and `INV-FP-1`; neither holds it — see [§7](#7-open-gaps-and-escalations), which records the gap rather than waving it off | **HAZ-35** — accepted indefinitely under sustained overload rather than refused, so the accepted set grows and every artifact in it is in neither end state |
 | **CA2** open an auction | **HAZ-35** — accepted and never offered to anyone; the artifact is held with nothing acting on it | considered-and-clear: soliciting broadly is harmless because binding happens at CA4 and eligibility at CA3. A bid from an incapable robot costs a round trip and no commitment | **HAZ-35** — opened before the fleet's state is readable, so the bid set reflects a floor that no longer exists and every award from it is unhonourable | **HAZ-35** — held open without bound, waiting for a quorum of bids that never arrives |
 | **CA3** filter for eligibility | **HAZ-35** — no hard filter at all: every bidder is eligible and the award goes to whoever is cheapest, including a robot that cannot perform the task | **HAZ-35** — filtering by *cost* rather than by hard capability, so a partially-capable bidder is penalised and still winnable. This is the exact design CTL-15 names, and the reason "never mis-route" is only testable if eligibility is a filter | **HAZ-35** — filtered against a capability set read before a change the robot has since reported, so an eligible-at-read bidder is ineligible at award | considered-and-clear: an over-strict filter refuses work, which is CA6's subject and the safe direction — a refusal is a legitimate end state and a mis-award is not |
 | **CA4** award | **HAZ-35** — bids received, evaluated, and no award issued; the request stays in the accepted set with the auction closed | **HAZ-35** — awarded to a bidder the filter should have excluded, so the commitment cannot be honoured and nothing yet says so | **HAZ-15** — awarded while a prior award for the same request is still live, so one intent yields two commitments and, if both are honoured, two motion allocations | **HAZ-35** — an award left outstanding with no progress and never released, which holds the robot and strands the task at once |
@@ -141,13 +140,13 @@ naming the hazard here would assert an obligation this group does not carry.
 |---|---|
 | **Predicate** | For every award, the awarded bidder satisfies every capability the request declares as required. Eligibility is a total function of (the request's required capabilities, the bidder's reported capability set) alone: no cost, score, priority, load, or bid ordering can make an unqualified bidder awardable, and no qualified bidder is excluded by the same quantities. |
 | **Provenance** | contract ← HAZ-35 (realizes CTL-15, CTL-6) |
-| **Violation** | At the award boundary: an award whose bidder lacks a required capability; or, injected, a qualified and an unqualified bidder where raising the unqualified one's score changes the outcome. |
+| **Violation** | At the award boundary: an award whose bidder lacks a required capability; or, injected, a qualified and an unqualified bidder where raising **the qualified bidder's** cost past any finite amount changes which is awarded. |
 | **Forbids** | Modelling a missing capability as a large cost penalty — the natural implementation in any bidding system, and the one CTL-15 names, because it makes "never mis-route" untestable: under enough load every penalty is payable. Treating capability tags as advisory metadata the allocator may override. Any design where the eligible set is computed *after* ranking, so an empty eligible set silently falls back to the cheapest bid. |
 | **Minimal** | Not implied by `INV-RMF-2`: a dispatcher that always reaches an end state can reach it by awarding to an incapable robot and discovering the failure later, which satisfies that row's bound and violates this one. Not implied by `INV-FP-1` (`edge_oblysk`): that row requires a permission to exist before the dispatch boundary and says nothing about *which* robot the request is then committed to — the verdict validates the task, not the assignment. |
 | **Scope** | group |
-| **Tier** | **T3** — a property of a single determination, decidable by a decision table over (required tags × reported tags) with no running system. The score-perturbation oracle is also T3: it is two evaluations of a pure function, not a driven system. |
+| **Tier** | **T3** — a property of a single determination, decidable by a decision table over (required tags × reported tags) with no running system. The perturbation oracle is also T3 — two evaluations of a pure function — but **its direction is load-bearing**: sweeping the *unqualified* bidder's cost cannot discriminate, because under a penalty design its effective score is `base + P` and a large `P` keeps the outcome flat across the whole sweep. The row's own Forbids clause says where the failure actually arrives — *under enough load every penalty is payable* — so the oracle must raise **the qualified bidder's** cost past `P`, or observe the eligible set directly before ranking. A sweep in the other direction passes on exactly the design this row exists to exclude. |
 | **Interleaving** | *(not a T0 row)* |
-| **Established by** | *(filled in by the design cycle)* |
+| **Established by** | [`dispatch.md §6.2`](../control/dispatch.md#62-eligibility-and-the-freshness-it-is-decided-against-inv-rmf-1-inv-rmf-4) |
 
 ### INV-RMF-2 — Every accepted request reaches a startable state or a stated refusal, within a bound
 
@@ -161,7 +160,7 @@ naming the hazard here would assert an obligation this group does not carry.
 | **Scope** | group |
 | **Tier** | **T1** — a bounded-progress property under injected fleet conditions (no bidders, no eligible bidders, sustained overload), shown by deterministic simulation. The bound's *value* is a real-timing question for the design page; that an end state is reached is not. |
 | **Interleaving** | *(not a T0 row)* |
-| **Established by** | *(filled in by the design cycle)* |
+| **Established by** | [`dispatch.md §6.1`](../control/dispatch.md#61-acceptance-and-capacity-refusal-inv-rmf-2-entry-half) |
 
 ### INV-RMF-3 — At most one live commitment per request, and a re-award requires an explicit release
 
@@ -171,11 +170,11 @@ naming the hazard here would assert an obligation this group does not carry.
 | **Provenance** | contract ← HAZ-15 (realizes CTL-15, CTL-6) |
 | **Violation** | Two live commitments for one request, observed in the commitment relation; or a release recorded by the dispatcher with the previously committed robot still executing. |
 | **Forbids** | Inferring release from an unresponsive bidder — the single most attractive design here, because a silent robot and an unavailable robot are indistinguishable without an explicit protocol, and re-awarding on silence keeps throughput up. Re-awarding on a bid or award timeout while the original award may still be in flight. Treating the commitment as dispatcher-local state that the robot's view is expected to follow. |
-| **Minimal** | Not implied by `INV-FP-14` (`edge_oblysk`), and the distinction is the reason this row exists. That row absorbs a **duplicate delivery of the same request** from upstream at the receiving boundary — a retry, replay or redelivery. This row constrains the **dispatcher's own decision** to commit the same request twice, which originates here and arrives through no delivery at all. A receiver with perfect idempotency against upstream retries can still award twice on its own initiative after a bid timeout. |
+| **Minimal** | Not implied by `INV-FP-14` (`edge_oblysk`), on two independent grounds. **(1) Two live commitments need not produce two enacted motions.** If `B` is awarded while `A`'s award is in flight and `A` completes first, `INV-FP-14` — *at most one motion allocation is enacted* — is satisfied, while this row is violated for the whole interval both commitments were live. Non-implication is strict, and this is the ground that survives an adversarial reading of `INV-FP-14`'s unqualified first sentence. **(2) `INV-FP-14` says nothing about release.** This row's second half — that a release is *agreed by the committed robot* and never inferred from silence — has no counterpart anywhere in the repo set. A weaker third ground, true but not load-bearing: that row's subject is duplicate *delivery* absorbed at the receiving boundary, while this row's is the dispatcher's own decision, arriving through no delivery at all. |
 | **Scope** | group |
 | **Tier** | **T0** — the failure is a concurrent interleaving of an award in flight and a timeout-driven release, and no deterministic simulation explores the schedule that exhibits it. The obligation is `formal/single-live-commitment/`, **not yet discharged**, and no capability level below L3 claims this row. |
 | **Interleaving** | 1. The dispatcher awards request `r` to robot `A` and starts its award-acknowledgement timer. 2. The award message is delayed in flight; `A` has not yet received it. 3. The timer expires. The dispatcher observes no acknowledgement and concludes `A` is unavailable. 4. The dispatcher marks `r` uncommitted and awards it to robot `B`. 5. The original award arrives at `A`, which accepts it and begins executing. Both `A` and `B` now hold a live commitment for `r` — the moment the invariant breaks, and neither party has done anything locally wrong. |
-| **Established by** | *(filled in by the design cycle)* |
+| **Established by** | [`dispatch.md §6.3`](../control/dispatch.md#63-award-release-and-the-one-thing-silence-may-not-mean-inv-rmf-3) |
 
 ### INV-RMF-4 — Eligibility is decided against a capability set no older than a declared bound
 
@@ -189,7 +188,7 @@ naming the hazard here would assert an obligation this group does not carry.
 | **Scope** | group |
 | **Tier** | **T1** — an injected-staleness property: report a capability loss at a controlled point in the auction and require the award to reflect it or exclude the bidder. Deterministic simulation suffices; the bound's value is the design page's. |
 | **Interleaving** | *(not a T0 row)* |
-| **Established by** | *(filled in by the design cycle)* |
+| **Established by** | [`dispatch.md §6.2`](../control/dispatch.md#62-eligibility-and-the-freshness-it-is-decided-against-inv-rmf-1-inv-rmf-4) |
 
 ### INV-RMF-5 — A refusal names a reason from a declared, enumerable set
 
@@ -203,7 +202,7 @@ naming the hazard here would assert an obligation this group does not carry.
 | **Scope** | group |
 | **Tier** | **T3** — a property of the refusal interface's declared surface, decidable by enumerating the reason set against the distinguishable outcomes, with no running system. |
 | **Interleaving** | *(not a T0 row)* |
-| **Established by** | *(filled in by the design cycle)* |
+| **Established by** | [`dispatch.md §6.4`](../control/dispatch.md#64-progress-to-an-end-state-and-what-a-refusal-says-inv-rmf-2-inv-rmf-5) |
 
 ## 4. Shape sweep
 
@@ -219,6 +218,18 @@ Completeness pass. Every shape answered with a candidate or an explicit N/A + re
 | freshness bound | `INV-RMF-4` | The capability observation's age at award. Complements `INV-RMF-1` exactly. |
 | idempotence | N/A | Absorbing a duplicate delivery of the same request is `INV-FP-14`'s, at the receiving boundary — which is this component, so the obligation lands here while the row lives there. Recorded as a cross-group tie in [`README.md §5`](README.md#5-cross-group-ties) rather than duplicated. |
 | liveness / progress | `INV-RMF-2` | Bounded progress to an end state under every fleet condition. |
+
+### 4.1 Deferred to the design cycle
+
+Two rows quantify over a bound whose **value** is not declared anywhere yet. `INV-RMF-2`'s is the
+time within which an accepted request must start or be refused; `INV-RMF-4`'s is the maximum age of
+a capability observation usable for eligibility. Both are design-page questions and `§11` of
+[`../control/dispatch.md`](../control/dispatch.md) is deferred in the reduced page.
+
+The consequence is concrete and is recorded so it is not discovered at harness time: **F9 is not
+injectable as written** until `INV-RMF-4`'s bound has a value, because "an observation older than
+the bound" has no referent. The rows are admissible regardless — a predicate over a declared
+constant is still a predicate — but the constant is owed.
 
 ## 5. Rejection log
 
@@ -256,3 +267,24 @@ Rows that changed: **none**.
 The negative result is worth as much as the positive one: the three rejected mechanism candidates in
 §5 would all have moved under this swap — a sealed-bid close, an award-latency bound expressed in
 auction rounds, and a queue-depth alert on a queue that no longer exists.
+
+## 7. Open gaps and escalations
+
+**A lapsed verdict between issuance and acceptance is owned by no row in the repo set.**
+
+`INV-FP-1` requires exactly one PASS verdict issued *strictly before* a request crosses the dispatch
+boundary, by an authority admitted *at the moment the verdict was used*. It bounds the authority's
+currency, not the verdict's own age. `INV-HA-8` bounds a command's age from **issue to actuation**,
+at the egress guard — so a command issued freshly by an adapter acting on a ten-minute-old verdict
+satisfies it. Between the two lies an interval nothing constrains: verdict issued at `T`, accepted
+for dispatch at `T + Δ`, with no row bounding `Δ`.
+
+**Why no row was admitted here for it.** This group does not re-decide a verdict it was handed, and
+a row obliging the dispatcher to age-check one would put the judgement in the wrong place — the
+same division `INV-CDT-8` draws for the conduit, where the carrier delivers validity and the
+consumer judges it. The question is whether the *permission authority* should stamp a validity
+window on its verdict, which is `fast-path`'s to answer and `requirements`' to require.
+
+Recorded here because §2's CA1 wrong-timing cell is cleared on this reasoning, and a cleared cell
+whose reason is "someone else owns it" must name someone who does — or say plainly, as this one
+now does, that nobody yet has.
