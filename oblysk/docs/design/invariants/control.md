@@ -152,10 +152,10 @@ naming the hazard here would assert an obligation this group does not carry.
 
 | Clause | |
 |---|---|
-| **Predicate** | For every request the dispatcher accepts, within a declared bound it either reaches a state in which some step of it can start, or it is refused. No accepted request is in neither state after the bound, under any fleet condition including no eligible bidder, no bids at all, and sustained overload. |
+| **Predicate** | For every request the dispatcher accepts, within a declared bound it leaves the accepted set through exactly one of three declared exits: it reaches a state in which some step of it can start, it is refused with a stated reason, or **it is withdrawn by the caller that submitted it**. No accepted request is in none of those states after the bound, under any fleet condition including no eligible bidder, no bids at all, and sustained overload. |
 | **Provenance** | contract ← HAZ-35 (realizes CTL-15, CTL-6) |
 | **Violation** | An accepted request observed after the bound with no start and no refusal; an overload trace in which the accepted set grows without bound. |
-| **Forbids** | Accepting work whenever it arrives and letting the queue absorb the excess — the default behaviour of every queue, and the reason HAZ-35 exists: backpressure that is expressed as unbounded acceptance converts an overload into a silent stall. An auction that closes with no bids and simply retries, with no terminal refusal. Any design where "no eligible bidder" is a transient condition retried forever rather than a refusable outcome. |
+| **Forbids** | Accepting work whenever it arrives and letting the queue absorb the excess — the default behaviour of every queue, and the reason HAZ-35 exists: backpressure that is expressed as unbounded acceptance converts an overload into a silent stall. An auction that closes with no bids and simply retries, with no terminal refusal. Any design where "no eligible bidder" is a transient condition retried forever rather than a refusable outcome. And — the exit the first draft left uncatalogued — **any design in which the dispatcher may record a withdrawal the caller did not request**, which would let a silent stall be relabelled as one and satisfy the row vacuously. Withdrawal is the *caller's* act; HAZ-35's two states are the dispatcher's. |
 | **Minimal** | Not implied by `INV-RMF-1`: a perfectly filtered dispatcher with no eligible bidder must still reach an end state, and filtering says nothing about doing so. Not implied by `INV-RMF-5`, which constrains what a refusal *says* once issued and not that one is issued at all. Not implied by `INV-IR-7`, HAZ-35's only prior refinement: that row constrains an IR's internal structure at the producer's emit boundary, upstream of acceptance, and a structurally perfect IR can still be accepted and stranded. |
 | **Scope** | group |
 | **Tier** | **T1** — a bounded-progress property under injected fleet conditions (no bidders, no eligible bidders, sustained overload), shown by deterministic simulation. The bound's *value* is a real-timing question for the design page; that an end state is reached is not. |
@@ -170,7 +170,7 @@ naming the hazard here would assert an obligation this group does not carry.
 | **Provenance** | contract ← HAZ-15 (realizes CTL-15, CTL-6) |
 | **Violation** | Two live commitments for one request, observed in the commitment relation; or a release recorded by the dispatcher with the previously committed robot still executing. |
 | **Forbids** | Inferring release from an unresponsive bidder — the single most attractive design here, because a silent robot and an unavailable robot are indistinguishable without an explicit protocol, and re-awarding on silence keeps throughput up. Re-awarding on a bid or award timeout while the original award may still be in flight. Treating the commitment as dispatcher-local state that the robot's view is expected to follow. |
-| **Minimal** | Not implied by `INV-FP-14` (`edge_oblysk`), on two independent grounds. **(1) Two live commitments need not produce two enacted motions.** If `B` is awarded while `A`'s award is in flight and `A` completes first, `INV-FP-14` — *at most one motion allocation is enacted* — is satisfied, while this row is violated for the whole interval both commitments were live. Non-implication is strict, and this is the ground that survives an adversarial reading of `INV-FP-14`'s unqualified first sentence. **(2) `INV-FP-14` says nothing about release.** This row's second half — that a release is *agreed by the committed robot* and never inferred from silence — has no counterpart anywhere in the repo set. A weaker third ground, true but not load-bearing: that row's subject is duplicate *delivery* absorbed at the receiving boundary, while this row's is the dispatcher's own decision, arriving through no delivery at all. |
+| **Minimal** | Not implied by `INV-FP-14` (`edge_oblysk`), on two independent grounds. **(1) Two live commitments need not produce two enacted motions.** Take the case where `B` is awarded while `A`'s award is in flight, `A` then receives it and executes to completion, and `B`'s commitment is released on that completion without `B` ever starting. **One** motion allocation is enacted, so `INV-FP-14` is satisfied — and this row is violated for the whole interval both commitments were live. Note the canonical interleaving in this row's own `Interleaving` clause is *not* that case: there both robots begin executing, which violates `INV-FP-14` too. The distinguishing case is the one where the race resolves before the second robot moves, and it is the one an adversarial reading of `INV-FP-14`'s unqualified first sentence cannot absorb. **(2) `INV-FP-14` says nothing about release.** This row's second half — that a release is *agreed by the committed robot* and never inferred from silence — has no counterpart anywhere in the repo set. A weaker third ground, true but not load-bearing: that row's subject is duplicate *delivery* absorbed at the receiving boundary, while this row's is the dispatcher's own decision, arriving through no delivery at all. |
 | **Scope** | group |
 | **Tier** | **T0** — the failure is a concurrent interleaving of an award in flight and a timeout-driven release, and no deterministic simulation explores the schedule that exhibits it. The obligation is `formal/single-live-commitment/`, **not yet discharged**, and no capability level below L3 claims this row. |
 | **Interleaving** | 1. The dispatcher awards request `r` to robot `A` and starts its award-acknowledgement timer. 2. The award message is delayed in flight; `A` has not yet received it. 3. The timer expires. The dispatcher observes no acknowledgement and concludes `A` is unavailable. 4. The dispatcher marks `r` uncommitted and awards it to robot `B`. 5. The original award arrives at `A`, which accepts it and begins executing. Both `A` and `B` now hold a live commitment for `r` — the moment the invariant breaks, and neither party has done anything locally wrong. |
@@ -226,10 +226,17 @@ time within which an accepted request must start or be refused; `INV-RMF-4`'s is
 a capability observation usable for eligibility. Both are design-page questions and `§11` of
 [`../control/dispatch.md`](../control/dispatch.md) is deferred in the reduced page.
 
-The consequence is concrete and is recorded so it is not discovered at harness time: **F9 is not
-injectable as written** until `INV-RMF-4`'s bound has a value, because "an observation older than
-the bound" has no referent. The rows are admissible regardless — a predicate over a declared
-constant is still a predicate — but the constant is owed.
+The consequence is concrete and is recorded so it is not discovered at harness time, and it is
+wider than the first draft admitted. **F9 is not injectable as written** until `INV-RMF-4`'s bound
+has a value, because "an observation older than the bound" has no referent. **The same is true of
+F1, F2 and F8** — all three feed `INV-RMF-2`'s §12 pass threshold, which reads "within the bound",
+and that bound is equally undeclared. Four of the nine faults in
+[`../verification/control.md §2`](../verification/control.md#2-fault-catalog) are therefore
+ungradable today, not one.
+
+The rows are admissible regardless — a predicate over a declared constant is still a predicate — but
+two constants are owed, and a harness built before they exist would silently grade against whatever
+it chose.
 
 ## 5. Rejection log
 
@@ -264,9 +271,7 @@ Rows that changed: **none**.
 - `INV-RMF-5` holds — refusal reasons are a property of the refusal interface, and the swap changes
   which reasons occur, not which are declarable.
 
-The negative result is worth as much as the positive one: the three rejected mechanism candidates in
-§5 would all have moved under this swap — a sealed-bid close, an award-latency bound expressed in
-auction rounds, and a queue-depth alert on a queue that no longer exists.
+The negative result is worth as much as the positive one. **Two** of §5's rejections are mechanism-shaped, and between them they would have moved three things under this swap: the sealed-bid close, an award-latency bound expressed in auction rounds, and a queue-depth alert on a queue that no longer exists. (An earlier draft counted those three phrasings as three rejection rows; §5 has five rows, of which one is mechanism on clause 1/2 and one is an operability requirement on clause 4/5.)
 
 ## 7. Open gaps and escalations
 
