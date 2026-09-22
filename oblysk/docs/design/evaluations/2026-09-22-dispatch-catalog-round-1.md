@@ -18,7 +18,7 @@ that Minimal claim is untouched and sufficient by itself.
 
 | ID | Sev | Type | Status | Title |
 |----|-----|------|--------|-------|
-| F1 | medium | inconsistency | open | `requirements/invariants.md`'s refinement column was never updated for these five rows |
+| F1 | medium | inconsistency | fixed | `requirements/invariants.md`'s refinement column was never updated for these five rows |
 | F2 | medium | inconsistency | fixed | `INV-RMF-3`'s Ground 1 against `INV-FP-14` is unsupported by the catalog's own canonical interleaving |
 | F3 | low | inconsistency | fixed | §6 counts "three rejected mechanism candidates" against a rejection log that names two |
 
@@ -27,7 +27,7 @@ that Minimal claim is untouched and sufficient by itself.
 ### F1 — `requirements/invariants.md`'s refinement column was never updated for these five rows
 - **Severity:** medium
 - **Type:** inconsistency
-- **Status:** open
+- **Status:** fixed
 - **Refs:** `services/rmf_oblysk/oblysk/docs/design/invariants/control.md` (Provenance rows for
   `INV-RMF-1..5`), `requirements/invariants.md` lines 90, 104, 124
 - **Claim:** The catalog's own README leans on `requirements/invariants.md`'s refinement column as
@@ -62,6 +62,12 @@ that Minimal claim is untouched and sufficient by itself.
   design change · **R** closes the exact gap this catalog's own admission procedure depends on for the
   next repo · **T** before or alongside the next submodule-pointer bump for `rmf_oblysk`
 - **Backlog:** —
+- **Closed 2026-09-22:** the edit landed as one pass over the table covering `INV-CDT-*`, `INV-RMF-*`
+  and `INV-ADP-*` together. HAZ-15's cell now reads `INV-FP-14, INV-RMF-3`; HAZ-35's reads
+  `INV-IR-7, INV-RMF-1, INV-RMF-2, INV-RMF-4, INV-RMF-5`. The stated measure holds —
+  `INV-RMF-[0-9]*` occurrences in `requirements/invariants.md` went 0 → 5. The finding's medium-
+  confidence read on severity was the right one: this was mid-cycle, and the bundled edit is the
+  `ha`/`ing` precedent it names.
 
 ### F2 — `INV-RMF-3`'s Ground 1 against `INV-FP-14` is unsupported by the catalog's own canonical interleaving
 - **Severity:** medium
