@@ -54,3 +54,7 @@ RUN apt-get update && source /opt/ros/jazzy/setup.bash && \
 WORKDIR /overlay
 RUN source /opt/ros/jazzy/setup.bash && source /ws/install/setup.bash && \
     colcon build --cmake-args -DCMAKE_BUILD_TYPE=Release
+COPY oblysk/launch /opt/oblysk/launch
+COPY oblysk/docker/rmf-entrypoint.sh /opt/oblysk/rmf-entrypoint.sh
+RUN chmod +x /opt/oblysk/rmf-entrypoint.sh
+CMD ["/opt/oblysk/rmf-entrypoint.sh"]
