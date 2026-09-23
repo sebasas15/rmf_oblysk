@@ -44,3 +44,13 @@ ENV RMW_IMPLEMENTATION=rmw_cyclonedds_cpp \
     LIBGL_ALWAYS_SOFTWARE=1 \
     QT_QPA_PLATFORM=offscreen
 CMD ["bash"]
+
+FROM base AS overlay
+# The oblysk overlay: our packages built against the RMF workspace.
+COPY oblysk/src /overlay/src
+RUN apt-get update && source /opt/ros/jazzy/setup.bash && \
+    rosdep install --from-paths /overlay/src --ignore-src -r -y --rosdistro jazzy && \
+    rm -rf /var/lib/apt/lists/*
+WORKDIR /overlay
+RUN source /opt/ros/jazzy/setup.bash && source /ws/install/setup.bash && \
+    colcon build --cmake-args -DCMAKE_BUILD_TYPE=Release
