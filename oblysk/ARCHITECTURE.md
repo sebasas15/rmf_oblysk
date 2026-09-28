@@ -112,9 +112,11 @@ the process-model table, which is the section most of the timing rows trace back
 
 ## 3. Build target graph
 
-**None yet — design only.** The overlay carries `oblysk/README.md`, this page and `docs/design/`.
-Upstream's own build (`colcon`, `rmf.repos`, the `ros:jazzy` devcontainer) is unchanged and is not
-this overlay's to describe.
+**Stage 0, `L0`.** The overlay carries `oblysk/README.md`, this page, `docs/design/`, and the first
+code: `oblysk/src/oblysk_dispatch` (the `control.dispatch` L0 forwarder, whose `accept()` is the
+provided operation of `docs/design/control/dispatch.md` §2), the Stage 0 image
+(`oblysk/docker/`), and the `rmf` service launch (`oblysk/launch/`). Upstream's own build
+(`colcon`, `rmf.repos`, root `Dockerfile`) is unchanged and is not this overlay's to describe.
 
 When targets land, §2's boundary dictates the shape: the commitment authority and its filter are one
 unit; the refusal reason set is a declarative artifact readable by a test independently of the

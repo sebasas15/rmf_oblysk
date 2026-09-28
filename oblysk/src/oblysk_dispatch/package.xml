@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<package format="3">
+  <name>oblysk_dispatch</name>
+  <version>0.0.1</version>
+  <description>control.dispatch at L0: forward a ValidatedTaskRequest's rmf body to rmf_task.</description>
+  <maintainer email="salazar.s.as@gmail.com">Sebastian Salazar</maintainer>
+  <license>Apache-2.0</license>
+
+  <buildtool_depend>ament_cmake</buildtool_depend>
+  <depend>rclcpp</depend>
+  <depend>rmf_task_msgs</depend>
+  <depend>nlohmann-json-dev</depend>
+  <test_depend>ament_cmake_gtest</test_depend>
+
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
+</package>

@@ -1,0 +1,75 @@
+# Coherent, version-matched Open-RMF source set for ROS 2 Jazzy, frozen to exact
+# commits from open-rmf/rmf @ branch `jazzy` (resolved 2026-06-20). Built fully from
+# source — the Jazzy binary feed is incomplete/mismatched for this stack (no
+# reservation packages; demos require them). Integrity = digest-pinned base + these
+# exact commit pins + rosdep from GPG-signed repos. Regenerate by re-resolving the
+# `jazzy` branch HEADs of open-rmf/rmf's rmf.repos.
+repositories:
+  demonstrations/rmf_demos:
+    type: git
+    url: https://github.com/open-rmf/rmf_demos.git
+    version: 3f7b9727ce39ba421ba5727eed9d8612f1c85f66
+  rmf/ament_cmake_catch2:
+    type: git
+    url: https://github.com/open-rmf/ament_cmake_catch2.git
+    version: d42e48d11c4cf30cded135150305667330a477c7
+  rmf/rmf_api_msgs:
+    type: git
+    url: https://github.com/open-rmf/rmf_api_msgs.git
+    version: 0b844bec49aef81bcfb00fdf396027d7fe2d2159
+  rmf/rmf_battery:
+    type: git
+    url: https://github.com/open-rmf/rmf_battery.git
+    version: ab6b3656cf4f9e179bda4ff4af84e6bf64db455b
+  rmf/rmf_building_map_msgs:
+    type: git
+    url: https://github.com/open-rmf/rmf_building_map_msgs.git
+    version: 95d03347db41092bd7610a25d9bacc5a9b2cb3e4
+  rmf/rmf_internal_msgs:
+    type: git
+    url: https://github.com/open-rmf/rmf_internal_msgs.git
+    version: 04585f0e2b0da9f11327fb403d38bc547d648fa6
+  rmf/rmf_ros2:
+    type: git
+    url: https://github.com/open-rmf/rmf_ros2.git
+    version: 7eef65ad57b6c166c5cb8b2cfc30a2fc43392d20
+  rmf/rmf_simulation:
+    type: git
+    url: https://github.com/open-rmf/rmf_simulation.git
+    version: cbc663a5617ff3ca894b5e3be3cf1a8df181f657
+  rmf/rmf_task:
+    type: git
+    url: https://github.com/open-rmf/rmf_task.git
+    version: 66cc5a4ecb88a3dbe36bac10fefb51f4ba526c27
+  rmf/rmf_traffic:
+    type: git
+    url: https://github.com/open-rmf/rmf_traffic.git
+    version: ab881a6e841b235a0b58b9acc87dae8549614676
+  rmf/rmf_traffic_editor:
+    type: git
+    url: https://github.com/open-rmf/rmf_traffic_editor.git
+    version: 49b3d525b007a25868bc4793e3dd1abc8ef44c7b
+  rmf/rmf_utils:
+    type: git
+    url: https://github.com/open-rmf/rmf_utils.git
+    version: 0887bd19828a638d5e83b5ad0c272beada770f9a
+  rmf/rmf_visualization:
+    type: git
+    url: https://github.com/open-rmf/rmf_visualization.git
+    version: db7d12afa9a52f571b00b0c2bf1a3b4ba09c9d17
+  rmf/rmf_visualization_msgs:
+    type: git
+    url: https://github.com/open-rmf/rmf_visualization_msgs.git
+    version: 5e1dd19509eb93dec2a8568977d6007057a8c8cf
+  thirdparty/menge_vendor:
+    type: git
+    url: https://github.com/open-rmf/menge_vendor.git
+    version: 9ac199bf09142be4030ce021a5b9955247717f83
+  thirdparty/nlohmann_json_schema_validator_vendor:
+    type: git
+    url: https://github.com/open-rmf/nlohmann_json_schema_validator_vendor.git
+    version: 3eb9d61a809f9e2b66806a77f813fb3befd1982f
+  thirdparty/pybind11_json_vendor:
+    type: git
+    url: https://github.com/open-rmf/pybind11_json_vendor.git
+    version: 6a17b883c83851c37f92eac9d4f5954a8ca39f6a

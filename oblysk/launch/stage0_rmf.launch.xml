@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<!-- Stage 0 rmf service: the stock rmf_demos_gz office bring-up MINUS its fleet adapter (which runs
+     in the fleet-adapter service from adapters_oblysk) PLUS control.dispatch at L0. Include args
+     mirror the stock office launch files recorded in oblysk/docker/README.md. -->
+<launch>
+  <include file="$(find-pkg-share rmf_demos)/common.launch.xml">
+    <arg name="use_sim_time" value="true"/>
+    <arg name="viz_config_file" value="$(find-pkg-share rmf_demos)/include/office/office.rviz"/>
+    <arg name="config_file" value="$(find-pkg-share rmf_demos_maps)/office/office.building.yaml"/>
+    <arg name="headless" value="true"/>
+  </include>
+
+  <include file="$(find-pkg-share rmf_demos_gz)/simulation.launch.xml">
+    <arg name="map_name" value="office"/>
+    <arg name="gazebo_version" value="8"/>
+    <arg name="sim_update_rate" value="100"/>
+    <arg name="headless" value="true"/>
+  </include>
+
+  <node pkg="oblysk_dispatch" exec="dispatch_node" name="oblysk_dispatch" output="screen">
+    <param name="use_sim_time" value="true"/>
+  </node>
+</launch>
